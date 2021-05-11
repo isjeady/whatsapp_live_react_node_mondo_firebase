@@ -1,0 +1,10 @@
+.chat {
+    display: flex;
+    flex-direction: column;
+    flex: 0.65;
+    background-color: yellow;
+}
+
+.chat h1{
+    color: red;
+}
