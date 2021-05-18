@@ -8,10 +8,21 @@ import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
 import { useEffect, useState } from 'react';
 import axios from "../axios";
+import { useParams } from 'react-router-dom';
 
 const Chat = ({ messages }) => {
-
+    const { roomId } = useParams();
+    const [roomName,setRoomName] = useState("");
     const [input,setInput] = useState("");
+
+    useEffect(() => {
+        if(roomId){
+            axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
+                let room = response.data.room
+                setRoomName(room && room.name)
+            })
+        }
+    },[roomId])
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -33,7 +44,7 @@ const Chat = ({ messages }) => {
             <div className="chat__header">
 
                 <div className="chat__header_info">
-                    <h3>Chat Name</h3>
+                    <h3>{roomName}</h3>
                     <p>Visto l'ultima volta...</p>
                 </div>
 

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import "./SidebarChat.css"
 import { Avatar } from "@material-ui/core";
+import { Link } from 'react-router-dom';
 
-const SidebarChat = ({addNewChat}) => {
+const SidebarChat = ({room}) => {
 
     const [seed,setSeed] = useState("");
 
@@ -10,27 +11,14 @@ const SidebarChat = ({addNewChat}) => {
         setSeed(Math.floor(Math.random() * 5000))
     },[])
 
-    const createChat = () => {
-        const roomName = prompt("Inserisci un nome per la Chat!")
-
-        if(roomName){
-            //TODO da fare prossimamente
-        }
-    }
-
-    return !addNewChat ? (
-        <div className="sidebarChat">
+    return <Link to={`/rooms/${room._id}`}>
+            <div className="sidebarChat">
             <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
             <div className="sidebarChat__info">
-                <h2>Name : {JSON.stringify(seed)}</h2>
+                <h2>{room.name}</h2>
                 <p>Message</p>
             </div>
-        </div>
-    ) : (
-        <div onClick={createChat} className="sidebarChat">
-            <h3>Add New Chat</h3>
-        </div>
-    )
+        </div></Link>
 }
 
 export default SidebarChat
