@@ -4,9 +4,19 @@ import Sidebar from './sidebar/Sidebar';
 import Chat from './chat/Chat';
 import { useEffect, useState } from 'react';
 import Pusher from 'pusher-js'
+import axios from "./axios";
 
 function App() {
-  const [message,setMessage] = useState("MESSAGGIO");
+  const [messages,setMessages] = useState([]);
+
+
+  useEffect(() => {
+    axios.get("/api/v1/messages/sync").then((response) => {
+      //console.log(response)
+      setMessages(response.data)
+    })
+  })
+
 
   useEffect(() => {
     const pusher = new Pusher('139e3b7703cbe6a66c04', {
@@ -15,9 +25,9 @@ function App() {
 
     var channel = pusher.subscribe(`messages`);
 
-    channel.bind('inserted', function(data) {
+    channel.bind('inserted', function(newMessage) {
       //alert(JSON.stringify(data));
-      setMessage(data.message)
+      setMessages([...messages,newMessage])
     });
  
   }, [])
@@ -25,7 +35,7 @@ function App() {
 
   return (
     <div className="app">
-      <h1>{message}</h1>
+      <pre>{JSON.stringify(messages,undefined,2)}</pre>
       <div className="app__body">
         <Sidebar />
         <Chat />

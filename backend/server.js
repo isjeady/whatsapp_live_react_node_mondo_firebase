@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Messages from "./model/dbMessages.js";
-
+import cors from "Cors"
 import Pusher from 'pusher'
 
 let pusher = new Pusher({
@@ -15,6 +15,7 @@ let pusher = new Pusher({
 const app = express();
 const port = process.env.NODE_PORT || 9000;
 app.use(express.json());
+app.use(cors());
 //app.use(cors());
 const connectionUrl = "mongodb+srv://new-user:vjWCiR4wnET7r5hw@cluster0.yqgw0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
                       // mongodb+srv://new-user:vjWCiR4wnET7r5hw@cluster0.yqgw0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
@@ -48,7 +49,8 @@ db.once("open", () => {
             const record = change.fullDocument;
             pusher.trigger("messages", "inserted", {
                 name : record.name,
-                message : record.message
+                message : record.message,
+                timestamp : record.timestamp
             })
         }else{
             console.log("Not Trigger Pusher")

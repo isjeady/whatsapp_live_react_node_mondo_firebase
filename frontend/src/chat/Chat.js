@@ -41,23 +41,6 @@ const Chat = () => {
                     Message
                     <span className="chat__timestamp">{new Date().toUTCString()}</span>
                 </p>
-                <p className="chat__message">
-                    <span className="chat__name">Jack</span>
-                    Message
-                    <span className="chat__timestamp">{new Date().toUTCString()}</span>
-                </p>
-                <p className="chat__message chat__receiver">
-                    <span className="chat__name">Jack</span>
-                    Message
-                    <span className="chat__timestamp">{new Date().toUTCString()}</span>
-                </p>
-                <p className="chat__message">
-                    <span className="chat__name">Jack</span>
-                    Message
-                    <span className="chat__timestamp">{new Date().toUTCString()}</span>
-                </p>
-
-
             </div>
             <div className="chat__footer">
                 <IconButton>
