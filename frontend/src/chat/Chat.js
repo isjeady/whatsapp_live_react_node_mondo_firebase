@@ -6,8 +6,28 @@ import SearchOutlined from "@material-ui/icons/SearchOutlined";
 import MoreVert from "@material-ui/icons/MoreVert";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
+import { useEffect, useState } from 'react';
+import axios from "../axios";
 
-const Chat = () => {
+const Chat = ({ messages }) => {
+
+    const [input,setInput] = useState("");
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+
+        const body = {
+            message : input,
+            name: "AUTH NAME",
+            timestamp : "now",
+            received : true
+        }
+
+        await axios.post("/api/v1/messages",body).then().catch();
+        
+        setInput("")
+    }
+
     return (
         <div className="chat">
             <div className="chat__header">
@@ -30,8 +50,17 @@ const Chat = () => {
                 </div>
             </div>
             <div className="chat__body">
+                {messages.map((message) => {
+                    return <div>
+                        <p className={`chat__message ${!message.received && "chat__receiver"}`}>
+                            <span className="chat__name">{message.name}</span>
+                            {message.message}
+                            <span className="chat__timestamp">{message.timestamp}</span>
+                        </p>
+                    </div>
+                })}
                 
-                <p className="chat__message">
+                {/* <p className="chat__message">
                     <span className="chat__name">Jack</span>
                     Message
                     <span className="chat__timestamp">{new Date().toUTCString()}</span>
@@ -40,7 +69,7 @@ const Chat = () => {
                     <span className="chat__name">Jack</span>
                     Message
                     <span className="chat__timestamp">{new Date().toUTCString()}</span>
-                </p>
+                </p> */}
             </div>
             <div className="chat__footer">
                 <IconButton>
@@ -48,8 +77,15 @@ const Chat = () => {
                 </IconButton>
 
                 <form>
-                    <input placeholder="Scrivi un messaggio..." type="text"></input>
-                    <button type="submit">Invia un Messaggio</button>
+                    <input 
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Scrivi un messaggio..." 
+                    type="text"></input>
+                    <button 
+                    onClick={sendMessage}
+                    type="submit"
+                    >Invia un Messaggio</button>
                 </form>
 
                 <IconButton>

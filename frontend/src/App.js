@@ -35,10 +35,9 @@ function App() {
 
   return (
     <div className="app">
-      <pre>{JSON.stringify(messages,undefined,2)}</pre>
       <div className="app__body">
         <Sidebar />
-        <Chat />
+        <Chat messages={messages} />
       </div>
     </div>
   );
