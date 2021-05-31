@@ -7,10 +7,12 @@ import { useEffect, useState } from 'react';
 import Pusher from 'pusher-js'
 import axios from "./axios";
 import {BrowserRouter as Router,Switch,Route} from 'react-router-dom'
+import { useStateValue } from './StateProvider';
 
 function App() {
   const [messages,setMessages] = useState([]);
-  const [user,setUser] = useState(null);
+  const [{user},dispatch] = useStateValue();
+  //const [user,setUser] = useState();
 
 
   useEffect(() => {
