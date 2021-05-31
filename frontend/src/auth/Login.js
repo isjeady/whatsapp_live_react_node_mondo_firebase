@@ -1,8 +1,9 @@
 import React from 'react'
+import { auth, provider } from "../firebase"
+import { actionTypes } from '../reducer'
+import { useStateValue } from '../StateProvider'
 import "./Login.css"
-import { auth,provider} from "../firebase"
-import {useStateValue} from '../StateProvider'
-import {actionTypes} from '../reducer'
+import { saveToLocalStorage} from "../localStore"
 
 const Login = () => {
     const [{user}, dispatch] = useStateValue();
@@ -15,6 +16,7 @@ const Login = () => {
                 type : actionTypes.SET_USER,
                 user : result.user
             })
+            saveToLocalStorage("user",result.user)
         })
         .catch((error) => alert(error.message))
     }

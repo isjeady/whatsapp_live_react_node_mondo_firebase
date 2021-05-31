@@ -8,30 +8,41 @@ import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
 import { useEffect, useState } from 'react';
 import axios from "../axios";
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { useStateValue } from '../StateProvider';
 
 const Chat = ({ messages }) => {
     const { roomId } = useParams();
     const [roomName,setRoomName] = useState("");
+    const [lastSeen,setLastSeen] = useState("");
     const [input,setInput] = useState("");
+    const history = useHistory();
+    const [{user},dispatch] = useStateValue();
 
     useEffect(() => {
         if(roomId){
             axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
                 let room = response.data.room
                 setRoomName(room && room.name)
+                let lastMessage = messages[messages.length -1];
+                setLastSeen(lastMessage?.timestamp)
+            })
+            .catch((error) => {
+                setLastSeen("")
+                setRoomName("")
+                history.push("/");
             })
         }
-    },[roomId])
+    },[roomId,messages])
 
     const sendMessage = async (e) => {
         e.preventDefault();
 
         const body = {
             message : input,
-            name: "AUTH NAME",
-            timestamp : "now",
-            received : true
+            name: user?.displayName,
+            timestamp : new Date(),
+            uid : user?.uid,
         }
 
         await axios.post("/api/v1/messages",body).then().catch();
@@ -45,7 +56,8 @@ const Chat = ({ messages }) => {
 
                 <div className="chat__header_info">
                     <h3>{roomName}</h3>
-                    <p>Visto l'ultima volta...</p>
+                    <p>
+                        Visto l'ultima volta {new Date(lastSeen).toLocaleString()}</p>
                 </div>
 
                 <div className="chat__header_right">
@@ -63,10 +75,10 @@ const Chat = ({ messages }) => {
             <div className="chat__body">
                 {messages.map((message) => {
                     return <div>
-                        <p className={`chat__message ${!message.received && "chat__receiver"}`}>
+                        <p className={`chat__message ${message.uid === user?.uid && "chat__receiver"}`}>
                             <span className="chat__name">{message.name}</span>
                             {message.message}
-                            <span className="chat__timestamp">{message.timestamp}</span>
+                            <span className="chat__timestamp">{new Date(message.timestamp).toLocaleString()}</span>
                         </p>
                     </div>
                 })}

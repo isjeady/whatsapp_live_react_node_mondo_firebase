@@ -38,8 +38,9 @@ const Sidebar = () => {
             <div className="sidebar__header">
                 <div className="sidebar__header_left">
                     <IconButton>
-                          <Avatar src={user.photoURL}></Avatar>
+                          <Avatar src={user?.photoURL}></Avatar>
                     </IconButton>
+                    {user?.displayName}
                 </div>
                 <div className="sidebar__header_right">
                 <IconButton>

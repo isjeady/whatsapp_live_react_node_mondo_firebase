@@ -8,6 +8,8 @@ import Pusher from 'pusher-js'
 import axios from "./axios";
 import {BrowserRouter as Router,Switch,Route} from 'react-router-dom'
 import { useStateValue } from './StateProvider';
+import { Avatar } from '@material-ui/core';
+import { loadFromLocalStorage} from "./localStore"
 
 function App() {
   const [messages,setMessages] = useState([]);
@@ -20,7 +22,7 @@ function App() {
       //console.log(response)
       setMessages(response.data)
     })
-  })
+  },[messages])
 
 
   useEffect(() => {
@@ -51,7 +53,17 @@ function App() {
               <Chat messages={messages} />
             </Route>
             <Route path="/">
-              <h1>DASHBOARD</h1>
+              <div class="info-center">
+                <div class="info-center-item">
+                  <Avatar src={loadFromLocalStorage("user")?.photoURL}></Avatar>
+                </div>
+                <div class="info-center-item">
+                   {loadFromLocalStorage("user")?.displayName}
+                </div>
+                <div class="info-center-item">
+                  Seleziona una Chat!
+                </div>
+              </div>
             </Route>
           </Switch>
         </Router>
