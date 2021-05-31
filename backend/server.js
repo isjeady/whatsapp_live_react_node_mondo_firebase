@@ -1,8 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
-import Messages from "./model/dbMessages.js";
+// import Messages from "./model/dbMessages.js";
 import Rooms from "./model/dbRooms.js";
-import cors from "Cors"
+import cors from "cors"
 import Pusher from 'pusher'
 
 let pusher = new Pusher({
@@ -14,7 +14,7 @@ let pusher = new Pusher({
 });
 
 const app = express();
-const port = process.env.NODE_PORT || 9000;
+const port = process.env.PORT || 9000;
 app.use(express.json());
 app.use(cors());
 //app.use(cors());
@@ -61,8 +61,13 @@ db.once("open", () => {
     })
 })
 
-app.get("/api/v1/messages/sync", (req,res) => {
-    Messages.find((err,data) => {
+// ROOMS
+// GET - api/v1/rooms
+// POST - api/v1/rooms
+// GET - api/v1/rooms/:id 
+
+app.get("/api/v1/rooms",(req,res) => {
+    Rooms.find((err,data) => {
         if(err){
             res.status(500).send(err);
         }else{
@@ -71,20 +76,10 @@ app.get("/api/v1/messages/sync", (req,res) => {
     })
 })
 
-app.post("/api/v1/messages", (req,res) => {
-    const dbMessage = req.body;
+app.post("/api/v1/rooms",(req,res) => {
+    const dbRoom = req.body;
 
-    Messages.create(dbMessage, (err,data) => {
-        if(err){
-            res.status(500).send(err);
-        }else{
-            res.status(201).send(data)
-        }
-    })
-});
-
-app.get("/api/v1/rooms/sync",(req,res) => {
-    Rooms.find((err,data) => {
+    Rooms.create(dbRoom, (err,data) => {
         if(err){
             res.status(500).send(err);
         }else{
@@ -110,17 +105,63 @@ app.get("/api/v1/rooms/:id",(req,res) => {
     })
 })
 
-app.post("/api/v1/rooms",(req,res) => {
-    const dbRoom = req.body;
+// MESSAGES
+// GET - api/v1/rooms/:id/messages
+// POST - api/v1/rooms/:id/messages
 
-    Rooms.create(dbRoom, (err,data) => {
-        if(err){
-            res.status(500).send(err);
-        }else{
-            res.status(201).send(data)
-        }
-    })
+app.get("/api/v1/rooms/:id/messages", (req,res) => {
+    const roomId = req.params.id
+
+    Rooms.findById(roomId)
+        .then((room) => {
+            if(!room){
+                res.status(404).json({ 
+                    messages : "Room Not Found"
+                })
+            }
+            res.status(200).send(room.messages)
+        })
+        .catch((err) => {
+            res.status(404).json({ 
+                messages : "Room Not Found"
+            })
+        })
 })
+
+app.post("/api/v1/rooms/:id/messages", (req,res) => {
+    const dbMessage = req.body;
+    const roomId = req.params.id
+
+    Rooms.findById(roomId)
+        .then((room) => {
+            if(!room){
+                res.status(404).json({ 
+                    messages : "Room Not Found"
+                })
+            }
+            
+            room.messages.push(dbMessage)
+            room.save((err) => {
+                if (err) {
+                    res.status(500).send(err);
+                } else {
+                    res.status(201).send(dbMessage);
+                }
+            })
+
+        })
+        .catch((err) => {
+            res.status(500).json({ 
+                messages : "Error ID"
+            })
+        })
+});
+
+
+
+
+
+
 
 
 app.listen(port, () => {
