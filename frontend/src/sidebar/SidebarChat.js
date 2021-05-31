@@ -13,7 +13,7 @@ const SidebarChat = ({room}) => {
         let lMsg = (room?.messages 
             && room.messages[room.messages.length -1] 
             && room.messages[room.messages.length -1].message) || "-" 
-        let truncateMessage = lMsg.length > 5 ? `${lMsg.substr(0,5)}...`: lMsg;
+        let truncateMessage = lMsg.length > 20 ? `${lMsg.substr(0,20)}...`: lMsg;
         setLastMessage(truncateMessage)
     },[room])
 

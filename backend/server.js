@@ -5,10 +5,10 @@ import Rooms from "./model/dbRooms.js";
 import cors from "cors"
 import Pusher from 'pusher'
 
-let pusher = new Pusher({
-    appId: "1202355",
-    key: "139e3b7703cbe6a66c04",
-    secret: "1b30aeaf7541f4d0534d",
+const pusher = new Pusher({
+    appId: "1092549",
+    key: "0fa673c36c12981b5555",
+    secret: "cb4b24385b944e16c2c5",
     cluster: "eu",
     useTLS: true
 });
@@ -40,26 +40,38 @@ mongoose.connect(
 
 const db = mongoose.connection;
 
+
 db.once("open", () => {
-    console.log("Db Connected")
-
-    const msgCollection = db.collection("messagecontents")
-    const changeStream = msgCollection.watch();
-
-    changeStream.on('change',(change) => {
-        console.log(change)
-        if(change.operationType === "insert"){
-            const record = change.fullDocument;
-            pusher.trigger("messages", "inserted", {
-                name : record.name,
-                message : record.message,
-                timestamp : record.timestamp
-            })
-        }else{
-            console.log("Not Trigger Pusher")
-        }
-    })
-})
+    console.log("Db Connected");
+  
+    const msgRoom = db.collection("rooms");
+    //console.log(msgRoom.messages.length);
+  
+    var filter = [];
+    var options = { fullDocument: "updateLookup" };
+    const changeStream = msgRoom.watch(filter, options);
+  
+    changeStream.on("change", (change) => {
+      console.log(change);
+      if (change.operationType === "update") {
+        let messages = change.fullDocument.messages;
+        let roomId = change.fullDocument._id;
+        let lastMessage = messages[messages.length - 1];
+  
+        console.log(lastMessage);
+        //const record = change.updateDescription;
+  
+        pusher.trigger(`room_${roomId}`, "inserted", {
+          name: lastMessage.name,
+          message: lastMessage.message,
+          timestamp: lastMessage.timestamp,
+          uid: lastMessage.uid,
+        });
+      } else {
+        console.log("Not Trigger Pusher");
+      }
+    });
+  });
 
 // ROOMS
 // GET - api/v1/rooms

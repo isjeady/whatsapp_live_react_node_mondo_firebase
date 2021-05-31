@@ -10,20 +10,49 @@ import { useEffect, useState } from 'react';
 import axios from "../axios";
 import { useHistory, useParams } from 'react-router-dom';
 import { useStateValue } from '../StateProvider';
+import Pusher from 'pusher-js'
 
-const Chat = ({ messages }) => {
+const Chat = () => {
     const { roomId } = useParams();
     const [roomName,setRoomName] = useState("");
     const [lastSeen,setLastSeen] = useState("");
+
+    const [lastMessage,setLastMessage] = useState("");
+    const [messages,setMessages] = useState([]);
+
     const [input,setInput] = useState("");
     const history = useHistory();
     const [{user},dispatch] = useStateValue();
+
+    
+    useEffect(() => {
+        const pusher = new Pusher('0fa673c36c12981b5555', {
+        cluster: 'eu'
+        });
+
+        var channel = pusher.subscribe(`room_${roomId}`);
+
+        channel.bind('inserted', function(newMessage) {
+            //alert(JSON.stringify(data));
+            setMessages([...messages,newMessage])
+        });
+
+        return () => {
+            channel.unbind_all();
+            channel.unsubscribe();
+        };
+    }, [messages])
 
     useEffect(() => {
         if(roomId){
             axios.get(`/api/v1/rooms/${roomId}`).then((response) => {
                 let room = response.data.room
                 setRoomName(room && room.name)
+
+                axios.get(`/api/v1/rooms/${roomId}/messages`).then((response) => {
+                    setMessages(response.data)
+                })
+                
                 let lastMessage = messages[messages.length -1];
                 setLastSeen(lastMessage?.timestamp)
             })
@@ -33,7 +62,7 @@ const Chat = ({ messages }) => {
                 history.push("/");
             })
         }
-    },[roomId,messages])
+    },[roomId])
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -45,19 +74,24 @@ const Chat = ({ messages }) => {
             uid : user?.uid,
         }
 
-        await axios.post("/api/v1/messages",body).then().catch();
+        await axios.post(`/api/v1/rooms/${roomId}/messages`,body).then().catch();
         
         setInput("")
     }
 
     return (
-        <div className="chat">
+        <div className="chat" key={roomId}>
             <div className="chat__header">
 
                 <div className="chat__header_info">
                     <h3>{roomName}</h3>
                     <p>
-                        Visto l'ultima volta {new Date(lastSeen).toLocaleString()}</p>
+                        Visto l'ultima volta 
+                        {lastMessage?.timestamp ?
+                        new Date(lastSeen).toLocaleString()
+                            : ""
+                    }
+                    </p>
                 </div>
 
                 <div className="chat__header_right">
@@ -74,11 +108,17 @@ const Chat = ({ messages }) => {
             </div>
             <div className="chat__body">
                 {messages.map((message) => {
-                    return <div>
-                        <p className={`chat__message ${message.uid === user?.uid && "chat__receiver"}`}>
+                    return <div key={message._id}>
+                        <p 
+                        className={
+                            `chat__message 
+                            ${message.uid === user?.uid && "chat__receiver"}`
+                        }>
                             <span className="chat__name">{message.name}</span>
                             {message.message}
-                            <span className="chat__timestamp">{new Date(message.timestamp).toLocaleString()}</span>
+                            <span className="chat__timestamp">
+                                {new Date(message.timestamp).toLocaleString()}
+                            </span>
                         </p>
                     </div>
                 })}
