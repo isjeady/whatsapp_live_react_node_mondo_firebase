@@ -66,6 +66,8 @@ db.once("open", () => {
           message: lastMessage.message,
           timestamp: lastMessage.timestamp,
           uid: lastMessage.uid,
+          _id : lastMessage._id,
+          room_id : roomId
         });
       } else {
         console.log("Not Trigger Pusher");

@@ -17,12 +17,13 @@ function App() {
       ) : (
         <div className="app__body">
         <Router>
-          <Sidebar />
           <Switch>
             <Route path="/rooms/:roomId">
+              <Sidebar />
               <Chat />
             </Route>
             <Route path="/">
+            <Sidebar />
               <div class="info-center">
                 <div class="info-center-item">
                   <Avatar src={loadFromLocalStorage("user")?.photoURL}></Avatar>
